@@ -28,7 +28,15 @@ module.exports = {
     'import/extensions': [0, 'never'],
     'import/no-extraneous-dependencies': ['error', { devDependencies: ['./tailwind.config.js'] }],
     'react/react-in-jsx-scope': 'off',
-    'import/no-unresolved': 'off'
+    'import/no-unresolved': 'off',
+    'react/no-string-refs': 'off',
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': [
+      'warn',
+      {
+        additionalHooks: '(useRecoilCallback|useRecoilTransaction_UNSTABLE)'
+      }
+    ]
   },
   settings: {
     'import/resolver': {
