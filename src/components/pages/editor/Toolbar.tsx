@@ -1,19 +1,60 @@
-import type { FC } from 'react';
+import { FC, useContext, useCallback } from 'react';
 import type { Shape } from '~/src/types/editor';
-import { dispatch } from '~/src/hooks/useBus';
+import { dispatch as busDispacth } from '~/src/hooks/useBus';
 import { EDITOR_CANVAS_EVENTS } from '~/src/constants/editor';
+import { EditorContext, toggleDrawingMode } from '~/src/context/EditorContext';
 
 const Toolbar: FC = () => {
+  const { dispatch, state } = useContext(EditorContext);
+
+  /**
+   * Handle Shape Change
+   * @param shape Shape
+   * @returns void
+   */
   const handleShapeChange = (shape: Shape) => {
-    dispatch({
+    busDispacth({
       type: EDITOR_CANVAS_EVENTS.ADD_SHAPE,
       shape
     });
   };
 
+  /**
+   * Handle Toggle Drawing Mode
+   * @returns void
+   */
+  const handleToggleDrawingMode = useCallback(() => {
+    dispatch(toggleDrawingMode());
+  }, [dispatch]);
+
   return (
     <nav className="flex w-14 bg-white shadow-xl">
       <ul className="w-full py-5">
+        <li>
+          <button
+            onClick={handleToggleDrawingMode}
+            title="Pen"
+            className={`flex w-full justify-center p-3 text-gray-700 focus:ring-0 ${
+              state.drawingMode && 'bg-gray-200'
+            }`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="#2c3e50"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+              <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+            </svg>
+          </button>
+        </li>
+        <li className="my-2 border-b"></li>
         <li>
           <button
             onClick={() => handleShapeChange('rect')}

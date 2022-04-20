@@ -1,16 +1,19 @@
 import type { FC } from 'react';
 import { Toolbar, Panels, DocumentWindow } from '~/src/components/pages/editor';
+import { EditorContextProvider } from '~/src/context/EditorContext';
 
 const EditorPage: FC = () => {
   return (
-    <div className="flex min-h-screen">
-      <Toolbar />
+    <EditorContextProvider>
+      <div className="flex min-h-screen">
+        <Toolbar />
 
-      <div className="flex-1 lg:flex">
-        <DocumentWindow />
-        <Panels />
+        <div className="flex-1 lg:flex">
+          <DocumentWindow />
+          <Panels />
+        </div>
       </div>
-    </div>
+    </EditorContextProvider>
   );
 };
 
