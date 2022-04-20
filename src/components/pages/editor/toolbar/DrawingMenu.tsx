@@ -1,25 +1,18 @@
-import { FC, useContext, useCallback } from 'react';
-import { EditorContext, toggleDrawingMode } from '~/src/context/EditorContext';
+import type { FC } from 'react';
+import useStore from '~/src/store/editorStore';
 
 const DrawingMenu: FC = () => {
-  const { dispatch, state } = useContext(EditorContext);
-
-  /**
-   * Handle Toggle Drawing Mode
-   * @returns void
-   */
-  const handleToggleDrawingMode = useCallback(() => {
-    dispatch(toggleDrawingMode());
-  }, [dispatch]);
+  const drawingMode = useStore((state) => state.drawingMode);
+  const toggleDrawingMode = useStore((dispatch) => dispatch.toggleDrawingMode);
 
   return (
     <ul className="w-full">
       <li>
         <button
-          onClick={handleToggleDrawingMode}
+          onClick={toggleDrawingMode}
           title="Pen"
           className={`flex w-full justify-center p-3 text-gray-700 focus:ring-0 ${
-            state.drawingMode && 'bg-gray-200'
+            drawingMode && 'bg-gray-200'
           }`}
         >
           <svg

@@ -5280,6 +5280,7 @@ __metadata:
     rimraf: ^3.0.2
     tailwindcss: ^3.0.24
     typescript: ^4.6.3
+    zustand: ^4.0.0-rc.0
   languageName: unknown
   linkType: soft
 
@@ -6530,6 +6531,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"use-sync-external-store@npm:1.0.0":
+  version: 1.0.0
+  resolution: "use-sync-external-store@npm:1.0.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0-rc
+  checksum: f3df10af62625169d6a8cd8d4f38942dc6817aa27398fa7f474421fd574b0c4c83679b9d15f983f482c396ee1183416eb146814c81f44241e1480acd701ef018
+  languageName: node
+  linkType: hard
+
 "util-deprecate@npm:^1.0.1, util-deprecate@npm:^1.0.2":
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2"
@@ -6816,5 +6826,22 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^4.0.0-rc.0":
+  version: 4.0.0-rc.0
+  resolution: "zustand@npm:4.0.0-rc.0"
+  dependencies:
+    use-sync-external-store: 1.0.0
+  peerDependencies:
+    immer: ">=9.0"
+    react: ">=16.8"
+  peerDependenciesMeta:
+    immer:
+      optional: true
+    react:
+      optional: true
+  checksum: fe927bd6b64102ce26d38096a9369fbd1fc733b2a81dde0fc73f96ff57eb356073ae62fff595ac354febe0b304d6b37d9056b5887a28e41c40f3695816d9ab83
   languageName: node
   linkType: hard

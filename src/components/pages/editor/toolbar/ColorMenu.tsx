@@ -1,38 +1,28 @@
-import { FC, useContext, useState, useCallback, useRef } from 'react';
+import { FC, useState, useRef } from 'react';
 import { HexColorPicker } from 'react-colorful';
-import { EditorContext, setCurrentColor } from '~/src/context/EditorContext';
+import useStore from '~/src/store/editorStore';
 import useClickOutside from '~/src/hooks/useClickOutside';
 import useEsc from '~/src/hooks/useEsc';
 
 const ColorMenu: FC = () => {
   const [open, setOpen] = useState<boolean>(false);
-  const { state, dispatch } = useContext(EditorContext);
   const ref = useRef<HTMLDivElement>(null);
+
+  const color = useStore((state) => state.color);
+  const setColor = useStore((dispatch) => dispatch.setColor);
 
   useClickOutside(ref, () => setOpen(false));
   useEsc(() => setOpen(false));
-
-  /**
-   * Handle Color Change
-   * @param color {string}
-   * @returns void
-   */
-  const handleColorChange = useCallback(
-    (color: string) => {
-      dispatch(setCurrentColor(color));
-    },
-    [dispatch]
-  );
 
   return (
     <div ref={ref} className="relative">
       <ul className="w-full">
         <li>
           <button
-            title={state.color.toUpperCase()}
+            title={color.toUpperCase()}
             className="mx-auto my-2 block h-9 w-9 rounded text-center focus:ring-0"
             style={{
-              backgroundColor: state.color
+              backgroundColor: color
             }}
             onClick={() => setOpen(true)}
           />
@@ -41,7 +31,7 @@ const ColorMenu: FC = () => {
 
       {open && (
         <div className="absolute left-full top-2 z-50 ml-3 rounded-lg bg-white p-4 shadow-xl">
-          <HexColorPicker color={state.color} onChange={handleColorChange} />
+          <HexColorPicker color={color} onChange={setColor} />
         </div>
       )}
     </div>

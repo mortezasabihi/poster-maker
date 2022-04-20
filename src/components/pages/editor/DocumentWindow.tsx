@@ -1,15 +1,17 @@
-import { FC, useRef, useEffect, useCallback, useContext } from 'react';
+import { FC, useRef, useEffect, useCallback } from 'react';
 import { fabric } from 'fabric';
 import type { Shape } from '~/src/types/editor';
 import useBus from '~/src/hooks/useBus';
 import { EDITOR_CANVAS_EVENTS } from '~/src/constants/editor';
-import { EditorContext } from '~/src/context/EditorContext';
+import useStore from '~/src/store/editorStore';
 
 const DocumentWindow: FC = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvas = useRef<fabric.Canvas | null>(null);
-  const { state } = useContext(EditorContext);
+
+  const drawingMode = useStore((state) => state.drawingMode);
+  const color = useStore((state) => state.color);
 
   /**
    * Handle Canvas Init
@@ -55,12 +57,13 @@ const DocumentWindow: FC = () => {
   const handleDrawingMode = useCallback(() => {
     if (!canvas.current) return;
 
-    canvas.current.isDrawingMode = state.drawingMode;
-  }, [state.drawingMode]);
+    canvas.current.isDrawingMode = drawingMode;
+    canvas.current.freeDrawingBrush.color = color;
+  }, [color, drawingMode]);
 
   useEffect(() => {
     handleDrawingMode();
-  }, [handleDrawingMode]);
+  }, [drawingMode, handleDrawingMode]);
 
   /**
    * Handle Add Shape
