@@ -23,7 +23,7 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     semi: ['error', 'always'],
-    'space-before-function-paren': ['error', { anonymous: 'ignore', named: 'always' }],
+    'space-before-function-paren': 'off',
     'func-names': ['error', 'never'],
     'import/extensions': [0, 'never'],
     'import/no-extraneous-dependencies': ['error', { devDependencies: ['./tailwind.config.js'] }],
@@ -36,7 +36,9 @@ module.exports = {
       {
         additionalHooks: '(useRecoilCallback|useRecoilTransaction_UNSTABLE)'
       }
-    ]
+    ],
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': 'error'
   },
   settings: {
     'import/resolver': {
