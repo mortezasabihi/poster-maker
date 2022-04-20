@@ -66,6 +66,34 @@ const DocumentWindow: FC = () => {
   }, [drawingMode, handleDrawingMode]);
 
   /**
+   * Handle Change Active Object Color
+   * @returns void
+   */
+  const handleChangeActiveObjectColor = useCallback(() => {
+    if (!canvas.current) return;
+
+    const activeObjects = canvas.current.getActiveObjects();
+
+    if (activeObjects.length) {
+      activeObjects.forEach((activeObject) => {
+        const { type } = activeObject;
+
+        if (type === 'path') {
+          activeObject.set('stroke', color);
+        } else {
+          activeObject.set('fill', color);
+        }
+      });
+
+      canvas.current.renderAll();
+    }
+  }, [color]);
+
+  useEffect(() => {
+    handleChangeActiveObjectColor();
+  }, [handleChangeActiveObjectColor]);
+
+  /**
    * Handle Add Shape
    * @param shape Shape
    * @returns void
@@ -77,7 +105,7 @@ const DocumentWindow: FC = () => {
           new fabric.Rect({
             width: 100,
             height: 100,
-            fill: '#000',
+            fill: color,
             top: 100,
             left: 100
           })
@@ -86,7 +114,7 @@ const DocumentWindow: FC = () => {
         canvas.current.add(
           new fabric.Circle({
             radius: 50,
-            fill: '#e60d0d',
+            fill: color,
             top: 100,
             left: 100
           })
@@ -96,7 +124,7 @@ const DocumentWindow: FC = () => {
           new fabric.Triangle({
             width: 100,
             height: 100,
-            fill: '#13d35a',
+            fill: color,
             top: 100,
             left: 100
           })
@@ -112,7 +140,7 @@ const DocumentWindow: FC = () => {
             { x: 742, y: 137.5 }
           ],
           {
-            fill: '#4b0de6',
+            fill: color,
             top: 100,
             left: 100,
             width: 100,
@@ -137,7 +165,7 @@ const DocumentWindow: FC = () => {
               { x: -size / 2, y: side / 2 }
             ],
             {
-              fill: '#e1ff00',
+              fill: color,
               top: 100,
               left: 100
             }
