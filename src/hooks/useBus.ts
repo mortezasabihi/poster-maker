@@ -36,7 +36,18 @@ export const dispatch = (event: EventAction) => {
   });
 };
 
-const useBus = <T>(type: string, callback: (cb: EventAction & T) => void, deps = []) => {
+/**
+ * useBus
+ * @param type {string}
+ * @param callback {Function}
+ * @param deps
+ * @returns {void}
+ */
+const useBus = <T>(
+  type: string,
+  callback: (cb: EventAction & T) => void,
+  deps = []
+): ((event: EventAction) => void) => {
   useEffect(() => subscribe<T>(type, callback), [callback, type, deps]);
 
   return dispatch;
