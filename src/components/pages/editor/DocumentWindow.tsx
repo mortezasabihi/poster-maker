@@ -4,14 +4,30 @@ import type { Shape } from '~/src/types/editor';
 import useBus from '~/src/hooks/useBus';
 import { EDITOR_CANVAS_EVENTS } from '~/src/constants/editor';
 import useStore from '~/src/store/editorStore';
+import useEsc from '~/src/hooks/useEsc';
 
 const DocumentWindow: FC = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvas = useRef<fabric.Canvas | null>(null);
 
-  const drawingMode = useStore((state) => state.drawingMode);
+  const activeTool = useStore((state) => state.activeTool);
+  const setActiveTool = useStore((state) => state.setActiveTool);
   const color = useStore((state) => state.color);
+
+  /**
+   * Handle ESC key
+   * @returns {void}
+   */
+  const handleEscKey = useCallback(() => {
+    if (canvas.current) {
+      setActiveTool(null);
+      canvas.current.discardActiveObject();
+      canvas.current.renderAll();
+    }
+  }, [setActiveTool]);
+
+  useEsc(() => handleEscKey());
 
   /**
    * Handle Canvas Init
@@ -50,20 +66,84 @@ const DocumentWindow: FC = () => {
     };
   }, [handleCanvasInit]);
 
+  const mouseDown = useRef<boolean>(false);
+  const line = useRef<fabric.Line | null>(null);
+
   /**
-   * Handle Toggle Drawing Mode
+   * Handle Start Adding Line
+   * @param e {fabric.IEvent}
+   * @returns {void}
+   */
+  const handleStartAddingLine = useCallback(
+    (e: fabric.IEvent) => {
+      if (!canvas.current) return;
+      mouseDown.current = true;
+
+      const pointer = canvas.current.getPointer(e.e);
+
+      line.current = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+        stroke: color,
+        strokeWidth: 2
+      });
+
+      canvas.current.add(line.current);
+    },
+    [color]
+  );
+  /**
+   * Handle Start Drawing Line
+   * @param e {fabric.IEvent}
+   * @returns {void}
+   */
+  const handleStartDrawingLine = useCallback(
+    (e: fabric.IEvent) => {
+      if (!canvas.current || !mouseDown.current || !line.current) return;
+
+      const pointer = canvas.current.getPointer(e.e);
+
+      line.current.set({ x2: pointer.x, y2: pointer.y });
+      canvas.current.renderAll();
+    },
+    [mouseDown]
+  );
+  /**
+   * Handle Stop Drawing Line
+   * @returns {void}
+   */
+  const handleStopDrawingLine = (): void => {
+    mouseDown.current = false;
+  };
+
+  /**
+   * Handle Active Tool Change
    * @returns void
    */
-  const handleDrawingMode = useCallback(() => {
+  const handleActiveToolChange = useCallback(() => {
     if (!canvas.current) return;
 
-    canvas.current.isDrawingMode = drawingMode;
-    canvas.current.freeDrawingBrush.color = color;
-  }, [color, drawingMode]);
+    // free drawing mode
+    if (activeTool === 'pen') {
+      canvas.current.isDrawingMode = activeTool === 'pen';
+      canvas.current.freeDrawingBrush.color = color;
+    } else {
+      canvas.current.isDrawingMode = false;
+    }
+
+    // line drawing mode
+    if (activeTool === 'line') {
+      canvas.current.on('mouse:down', handleStartAddingLine);
+      canvas.current.on('mouse:move', handleStartDrawingLine);
+      canvas.current.on('mouse:up', handleStopDrawingLine);
+    } else {
+      canvas.current.off('mouse:down', handleStartAddingLine);
+      canvas.current.off('mouse:move', handleStartDrawingLine);
+      canvas.current.off('mouse:up', handleStopDrawingLine);
+    }
+  }, [activeTool, color, handleStartAddingLine, handleStartDrawingLine]);
 
   useEffect(() => {
-    handleDrawingMode();
-  }, [drawingMode, handleDrawingMode]);
+    handleActiveToolChange();
+  }, [activeTool, handleActiveToolChange]);
 
   /**
    * Handle Change Active Object Color

@@ -1,17 +1,20 @@
 import create from 'zustand';
 import { generateRandomHexColor } from '~/src/lib/utils';
+import { Tool } from '~/src/types/editor';
 
 interface EditorStore {
-  drawingMode: boolean;
+  activeTool: Tool | null;
   color: string;
-  toggleDrawingMode: () => void;
+
+  setActiveTool: (tool: Tool | null) => void;
   setColor: (color: string) => void;
 }
 
 const useStore = create<EditorStore>((set) => ({
-  drawingMode: false,
+  activeTool: null,
   color: generateRandomHexColor(),
-  toggleDrawingMode: () => set((state) => ({ ...state, drawingMode: !state.drawingMode })),
+
+  setActiveTool: (tool) => set((state) => ({ ...state, activeTool: tool })),
   setColor: (color) => set((state) => ({ ...state, color }))
 }));
 
