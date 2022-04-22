@@ -43,6 +43,7 @@
     "build": "rimraf ./dist && parcel build public/index.html --no-source-maps",
     "lint": "eslint --ext .ts,.tsx,.js,.jsx src",
     "prepare": "husky install",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "generate:theme": "node ./bin/generate-tailwind-theme"
   }
 }
