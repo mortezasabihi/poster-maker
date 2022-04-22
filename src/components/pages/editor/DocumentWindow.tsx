@@ -160,6 +160,8 @@ const DocumentWindow: FC = () => {
 
         if (type === 'path') {
           activeObject.set('stroke', color);
+        } else if (type === 'line') {
+          activeObject.set('stroke', color);
         } else {
           activeObject.set('fill', color);
         }
