@@ -1,8 +1,8 @@
 import { FC, useState, useRef } from 'react';
-import { HexColorPicker } from 'react-colorful';
 import useStore from '~/src/store/editorStore';
 import useClickOutside from '~/src/hooks/useClickOutside';
 import useEsc from '~/src/hooks/useEsc';
+import { ColorPicker } from '~/src/components/global';
 
 const ColorMenu: FC = () => {
   const [open, setOpen] = useState<boolean>(false);
@@ -31,7 +31,7 @@ const ColorMenu: FC = () => {
 
       {open && (
         <div className="absolute left-full top-2 z-50 ml-3 rounded-lg bg-white p-4 shadow-xl">
-          <HexColorPicker color={color} onChange={setColor} />
+          <ColorPicker value={color} onChange={setColor} />
         </div>
       )}
     </div>
