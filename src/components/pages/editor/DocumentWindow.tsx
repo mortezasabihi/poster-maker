@@ -2,7 +2,7 @@ import { FC, useRef, useEffect, useCallback } from 'react';
 import { fabric } from 'fabric';
 import type { Shape } from '~/src/types/editor';
 import useBus from '~/src/hooks/useBus';
-import { EDITOR_CANVAS_EVENTS } from '~/src/constants/editor';
+import { EDITOR_CANVAS_EVENTS } from '~/src/types/editor';
 import useStore from '~/src/store/editorStore';
 import useEsc from '~/src/hooks/useEsc';
 
@@ -258,6 +258,27 @@ const DocumentWindow: FC = () => {
   };
 
   useBus<{ shape: Shape }>(EDITOR_CANVAS_EVENTS.ADD_SHAPE, ({ shape }) => handleAddShape(shape));
+
+  /**
+   * Handle Add Text
+   * @param text {string}
+   * @returns {void}
+   */
+  const handleAddText = (text: string): void => {
+    if (canvas.current) {
+      canvas.current.add(
+        new fabric.IText(text, {
+          fontFamily: 'Arial',
+          left: 100,
+          top: 100,
+          fontSize: 20,
+          fill: color
+        })
+      );
+    }
+  };
+
+  useBus<{ text: string }>(EDITOR_CANVAS_EVENTS.ADD_TEXT, ({ text }) => handleAddText(text));
 
   return (
     <main className="flex w-full items-center justify-center bg-gray-200 lg:w-9/12">
