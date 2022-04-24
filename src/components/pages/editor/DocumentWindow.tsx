@@ -2,7 +2,7 @@ import { FC, useRef, useEffect, useCallback } from 'react';
 import { fabric } from 'fabric';
 import type { Shape } from '~/src/types/editor';
 import useBus from '~/src/hooks/useBus';
-import { EDITOR_CANVAS_EVENTS } from '~/src/types/editor';
+import { EDITOR_CANVAS_EVENTS, TextPayload } from '~/src/types/editor';
 import useStore from '~/src/store/editorStore';
 import useEsc from '~/src/hooks/useEsc';
 
@@ -14,6 +14,7 @@ const DocumentWindow: FC = () => {
   const activeTool = useStore((state) => state.activeTool);
   const setActiveTool = useStore((state) => state.setActiveTool);
   const color = useStore((state) => state.color);
+  const setActiveObject = useStore((state) => state.setActiveObject);
 
   /**
    * Handle ESC key
@@ -56,6 +57,18 @@ const DocumentWindow: FC = () => {
         fCanvas.setActiveObject(lastObject as unknown as fabric.Object);
       });
 
+      // on object selected
+      fCanvas.on('selection:created', (e: any) => {
+        if (e.selected.length === 1) {
+          setActiveObject(e.selected[0]);
+        }
+      });
+
+      // on object deselected
+      fCanvas.on('selection:cleared', () => {
+        setActiveObject(null);
+      });
+
       canvas.current = fCanvas;
 
       handleCanvasInit(fCanvas);
@@ -64,7 +77,7 @@ const DocumentWindow: FC = () => {
     return () => {
       canvas.current?.dispose();
     };
-  }, [handleCanvasInit]);
+  }, [handleCanvasInit, setActiveObject]);
 
   const mouseDown = useRef<boolean>(false);
   const line = useRef<fabric.Line | null>(null);
@@ -155,15 +168,15 @@ const DocumentWindow: FC = () => {
     const activeObjects = canvas.current.getActiveObjects();
 
     if (activeObjects.length) {
-      activeObjects.forEach((activeObject) => {
-        const { type } = activeObject;
+      activeObjects.forEach((object) => {
+        const { type } = object;
 
         if (type === 'path') {
-          activeObject.set('stroke', color);
+          object.set('stroke', color);
         } else if (type === 'line') {
-          activeObject.set('stroke', color);
+          object.set('stroke', color);
         } else {
-          activeObject.set('fill', color);
+          object.set('fill', color);
         }
       });
 
@@ -182,6 +195,9 @@ const DocumentWindow: FC = () => {
    */
   const handleAddShape = (shape: Shape) => {
     if (canvas.current) {
+      // deselect all objects
+      canvas.current.discardActiveObject();
+
       if (shape === 'rect') {
         canvas.current.add(
           new fabric.Rect({
@@ -280,8 +296,43 @@ const DocumentWindow: FC = () => {
 
   useBus<{ text: string }>(EDITOR_CANVAS_EVENTS.ADD_TEXT, ({ text }) => handleAddText(text));
 
+  /**
+   * Handle Update Object
+   * @param payload {TextPayload}
+   * @returns {void}
+   */
+  const handleUpdateObject = (payload: TextPayload): void => {
+    if (!canvas.current) return;
+
+    const type = canvas.current.getActiveObject()?.type;
+
+    if (type === 'i-text') {
+      const activeObject = canvas.current.getActiveObject() as fabric.IText;
+      const { fontFamily, fontSize, fontStyle, textAlign } = payload;
+
+      if (activeObject) {
+        activeObject.set({
+          fontFamily,
+          fontSize,
+          textAlign,
+          ...(fontStyle.includes('bold') ? { fontWeight: 'bold' } : { fontWeight: 'normal' }),
+          ...(fontStyle.includes('italic') ? { fontStyle: 'italic' } : { fontStyle: 'normal' }),
+          ...(fontStyle.includes('underline') ? { underline: true } : { underline: false }),
+          ...(fontStyle.includes('strikethrough') ? { linethrough: true } : { linethrough: false }),
+          ...(fontStyle.includes('overline') ? { overline: true } : { overline: false })
+        });
+      }
+
+      canvas.current.renderAll();
+    }
+  };
+
+  useBus<{ payload: TextPayload }>(EDITOR_CANVAS_EVENTS.UPDATE_OBJECT, ({ payload }) =>
+    handleUpdateObject(payload)
+  );
+
   return (
-    <main className="flex w-full items-center justify-center bg-gray-200 lg:w-9/12">
+    <main className="flex w-full items-center justify-center bg-gray-200 md:w-8/12 2xl:w-9/12">
       <div ref={wrapperRef} className="h-96 w-6/12 shadow-2xl">
         <canvas ref={canvasRef} />
       </div>

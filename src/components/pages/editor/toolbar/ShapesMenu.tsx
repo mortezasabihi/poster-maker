@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import type { Shape } from '~/src/types/editor';
 import { dispatch as busDispacth } from '~/src/hooks/useBus';
-import { EDITOR_CANVAS_EVENTS } from '~/src/constants/editor';
+import { EDITOR_CANVAS_EVENTS } from '~/src/types/editor';
 
 const ShapeMenu: FC = () => {
   /**

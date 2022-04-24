@@ -2,10 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-button {
-  @apply focus:outline-none focus:ring focus:ring-blue-300;
-}
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
 
-select {
-  @apply form-select rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50;
+  button {
+    @apply focus:border-blue-600 focus:outline-none;
+  }
+
+  label {
+    @apply mb-4 block text-xs uppercase tracking-wider text-gray-500;
+  }
+
+  input {
+    @apply form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-600 focus:ring-0;
+  }
 }
