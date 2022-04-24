@@ -45,6 +45,20 @@ const DocumentWindow: FC = () => {
     canvasInstance.renderAll();
   }, []);
 
+  /**
+   * Handle Object Selection
+   * @params e {any}
+   * @returns void
+   */
+  const handleObjectSelection = useCallback(
+    (e: any) => {
+      if (e.selected.length === 1) {
+        setActiveObject(e.selected[0]);
+      }
+    },
+    [setActiveObject]
+  );
+
   useEffect(() => {
     if (canvasRef.current) {
       const fCanvas = new fabric.Canvas(canvasRef.current);
@@ -58,11 +72,8 @@ const DocumentWindow: FC = () => {
       });
 
       // on object selected
-      fCanvas.on('selection:created', (e: any) => {
-        if (e.selected.length === 1) {
-          setActiveObject(e.selected[0]);
-        }
-      });
+      fCanvas.on('selection:created', handleObjectSelection);
+      fCanvas.on('selection:updated', handleObjectSelection);
 
       // on object deselected
       fCanvas.on('selection:cleared', () => {
@@ -77,7 +88,7 @@ const DocumentWindow: FC = () => {
     return () => {
       canvas.current?.dispose();
     };
-  }, [handleCanvasInit, setActiveObject]);
+  }, [handleCanvasInit, handleObjectSelection, setActiveObject]);
 
   const mouseDown = useRef<boolean>(false);
   const line = useRef<fabric.Line | null>(null);
