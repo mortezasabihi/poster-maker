@@ -3,7 +3,7 @@ import { Toolbar, Panels, DocumentWindow } from '~/src/components/pages/editor';
 
 const EditorPage: FC = () => {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen">
       <Toolbar />
 
       <div className="flex-1 lg:flex">

@@ -1,6 +1,5 @@
-import { FC, useId } from 'react';
-import Select, { StylesConfig } from 'react-select';
-import { useTheme } from '~/src/context/theme-context';
+import { FC } from 'react';
+import FormSelect, { Option, StyleType } from '~/src/components/global/FormSelect';
 
 interface IProps {
   value: string | undefined;
@@ -8,10 +7,7 @@ interface IProps {
 }
 
 const FontFamilySelector: FC<IProps> = ({ value, onChange }) => {
-  const id = useId();
-  const theme = useTheme();
-
-  const fonts: { value: string; label: string }[] = [
+  const fonts: Option[] = [
     { value: 'Verdana', label: 'Verdana' },
     { value: 'Arial', label: 'Arial' },
     { value: 'Helvetica', label: 'Helvetica' },
@@ -38,60 +34,25 @@ const FontFamilySelector: FC<IProps> = ({ value, onChange }) => {
     { value: 'Sans Serif', label: 'Sans Serif' }
   ];
 
-  const customStyles: StylesConfig<{ value: string; label: string }> = {
-    control: (provided, { isFocused }) => ({
-      ...provided,
-      borderRadius: theme.borderRadius.md,
-      boxShadow: theme.boxShadow.sm,
-      paddingTop: 2,
-      paddingBottom: 2,
-      ...(isFocused
-        ? {
-            borderColor: theme.borderColor.blue[600],
-            ':hover': {
-              borderColor: theme.borderColor.blue[600]
-            }
-          }
-        : {
-            ':hover': {
-              borderColor: theme.borderColor.gray[300]
-            }
-          })
-    }),
+  const customStyles: StyleType = {
     option: (provided, { data }) => ({
       ...provided,
-      fontFamily: data.value
+      fontFamily: (data as Option).value
     }),
-    input: (provided) => ({
-      ...provided,
-      color: theme.colors.black,
-      'input:focus': {
-        boxShadow: 'none'
-      }
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: theme.colors.gray[500]
-    }),
-    indicatorSeparator: () => ({ display: 'none' }),
     singleValue: (provided, { data }) => ({
       ...provided,
-      fontFamily: data.value
+      fontFamily: (data as Option).value
     })
   };
 
   return (
-    <div className="py-3">
-      <label htmlFor={id}>Font Family</label>
-
-      <Select
-        inputId={id}
-        options={fonts}
-        styles={customStyles}
-        value={fonts.find((font) => font.value === value)}
-        onChange={(v) => onChange((v as { value: string; label: string }).value)}
-      />
-    </div>
+    <FormSelect
+      label="Font Family"
+      options={fonts}
+      value={value}
+      onChange={onChange}
+      styles={customStyles}
+    />
   );
 };
 

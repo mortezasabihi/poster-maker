@@ -1,5 +1,6 @@
 import { FC, useRef, useEffect, useCallback } from 'react';
 import { fabric } from 'fabric';
+import { generateRandomId } from '~/src/lib/utils';
 import type { Shape } from '~/src/types/editor';
 import useBus from '~/src/hooks/useBus';
 import { EDITOR_CANVAS_EVENTS, TextPayload } from '~/src/types/editor';
@@ -15,6 +16,8 @@ const DocumentWindow: FC = () => {
   const setActiveTool = useStore((state) => state.setActiveTool);
   const color = useStore((state) => state.color);
   const setActiveObject = useStore((state) => state.setActiveObject);
+  const addLayer = useStore((state) => state.addLayer);
+  const updateLayer = useStore((state) => state.updateLayer);
 
   /**
    * Handle ESC key
@@ -59,17 +62,27 @@ const DocumentWindow: FC = () => {
     [setActiveObject]
   );
 
+  /**
+   * Handle Object Added
+   * @returns void
+   */
+  const handleObjectAdded = useCallback(() => {
+    if (!canvas.current) return;
+
+    canvas.current.renderAll();
+
+    // set last object active
+    const lastObject = canvas.current.item(canvas.current.getObjects().length - 1);
+    canvas.current.setActiveObject(lastObject as unknown as fabric.Object);
+
+    addLayer(lastObject as unknown as fabric.Object);
+  }, [addLayer]);
+
   useEffect(() => {
     if (canvasRef.current) {
       const fCanvas = new fabric.Canvas(canvasRef.current);
 
-      fCanvas.on('object:added', () => {
-        fCanvas.renderAll();
-
-        // set last object active
-        const lastObject = fCanvas.item(fCanvas.getObjects().length - 1);
-        fCanvas.setActiveObject(lastObject as unknown as fabric.Object);
-      });
+      fCanvas.on('object:added', handleObjectAdded);
 
       // on object selected
       fCanvas.on('selection:created', handleObjectSelection);
@@ -88,7 +101,7 @@ const DocumentWindow: FC = () => {
     return () => {
       canvas.current?.dispose();
     };
-  }, [handleCanvasInit, handleObjectSelection, setActiveObject]);
+  }, [handleCanvasInit, handleObjectAdded, handleObjectSelection, setActiveObject]);
 
   const mouseDown = useRef<boolean>(false);
   const line = useRef<fabric.Line | null>(null);
@@ -107,7 +120,8 @@ const DocumentWindow: FC = () => {
 
       line.current = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
         stroke: color,
-        strokeWidth: 2
+        strokeWidth: 2,
+        name: `line-${generateRandomId()}`
       });
 
       canvas.current.add(line.current);
@@ -149,6 +163,7 @@ const DocumentWindow: FC = () => {
     if (activeTool === 'pen') {
       canvas.current.isDrawingMode = activeTool === 'pen';
       canvas.current.freeDrawingBrush.color = color;
+      canvas.current.freeDrawingBrush.width = 2;
     } else {
       canvas.current.isDrawingMode = false;
     }
@@ -216,7 +231,8 @@ const DocumentWindow: FC = () => {
             height: 100,
             fill: color,
             top: 100,
-            left: 100
+            left: 100,
+            name: `rect-${generateRandomId()}`
           })
         );
       } else if (shape === 'circle') {
@@ -225,7 +241,8 @@ const DocumentWindow: FC = () => {
             radius: 50,
             fill: color,
             top: 100,
-            left: 100
+            left: 100,
+            name: `circle-${generateRandomId()}`
           })
         );
       } else if (shape === 'triangle') {
@@ -235,7 +252,8 @@ const DocumentWindow: FC = () => {
             height: 100,
             fill: color,
             top: 100,
-            left: 100
+            left: 100,
+            name: `triangle-${generateRandomId()}`
           })
         );
       } else if (shape === 'hexagon') {
@@ -253,7 +271,8 @@ const DocumentWindow: FC = () => {
             top: 100,
             left: 100,
             width: 100,
-            height: 100
+            height: 100,
+            name: `hexagon-${generateRandomId()}`
           }
         );
         canvas.current.add(s);
@@ -276,7 +295,8 @@ const DocumentWindow: FC = () => {
             {
               fill: color,
               top: 100,
-              left: 100
+              left: 100,
+              name: `octagon-${generateRandomId()}`
             }
           )
         );
@@ -299,7 +319,8 @@ const DocumentWindow: FC = () => {
           left: 100,
           top: 100,
           fontSize: 20,
-          fill: color
+          fill: color,
+          name: `text-${generateRandomId()}`
         })
       );
     }
@@ -341,6 +362,89 @@ const DocumentWindow: FC = () => {
   useBus<{ payload: TextPayload }>(EDITOR_CANVAS_EVENTS.UPDATE_OBJECT, ({ payload }) =>
     handleUpdateObject(payload)
   );
+
+  /**
+   * Handle Select Object
+   * @param name {string}
+   * @returns {void}
+   */
+  const handleSelectObject = (name: string): void => {
+    if (!canvas.current) return;
+
+    const objects = canvas.current.getObjects();
+
+    if (objects.length) {
+      objects.forEach((object) => {
+        if (object.name === name) {
+          canvas.current?.setActiveObject(object);
+        }
+      });
+    }
+
+    canvas.current.renderAll();
+  };
+
+  useBus<{ name: string }>(EDITOR_CANVAS_EVENTS.SELECT_OBJECT, ({ name }) =>
+    handleSelectObject(name)
+  );
+
+  /**
+   * Handle Lock Object
+   * @param name {string}
+   * @returns {void}
+   */
+  const handleLockObject = (name: string): void => {
+    if (!canvas.current) return;
+
+    const objects = canvas.current.getObjects();
+
+    if (objects.length) {
+      objects.forEach((object) => {
+        if (object.name === name) {
+          object.set({
+            lockMovementX: !object.lockMovementX,
+            lockMovementY: !object.lockMovementY,
+            lockScalingX: !object.lockScalingX,
+            lockScalingY: !object.lockScalingY,
+            lockRotation: !object.lockRotation
+          });
+
+          updateLayer(object.name as string, object);
+        }
+      });
+    }
+
+    canvas.current.renderAll();
+  };
+
+  useBus<{ name: string }>(EDITOR_CANVAS_EVENTS.LOCK_OBJECT, ({ name }) => handleLockObject(name));
+
+  /**
+   * Handle Hide Object
+   * @param name {string}
+   * @returns {void}
+   */
+  const handleHideObject = (name: string): void => {
+    if (!canvas.current) return;
+
+    const objects = canvas.current.getObjects();
+
+    if (objects.length) {
+      objects.forEach((object) => {
+        if (object.name === name) {
+          object.set({
+            visible: !object.visible
+          });
+
+          updateLayer(object.name as string, object);
+        }
+      });
+    }
+
+    canvas.current.renderAll();
+  };
+
+  useBus<{ name: string }>(EDITOR_CANVAS_EVENTS.HIDE_OBJECT, ({ name }) => handleHideObject(name));
 
   return (
     <main className="flex w-full items-center justify-center bg-gray-200 md:w-8/12 2xl:w-9/12">
