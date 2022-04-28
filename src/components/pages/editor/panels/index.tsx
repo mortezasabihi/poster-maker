@@ -3,13 +3,15 @@ import type { ActivePanel } from '~/src/types/editor';
 import SidebarMenu from './SidebarMenu';
 import ObjectPanel from './objectPanel';
 import LayerPanel from './layerPanel';
+import ArtboardPanel from './artboardPanel';
 
 const Panels: FC = () => {
   const [activePanel, setActivePanel] = useState<ActivePanel>('object');
 
   const components: { [key in ActivePanel]: FC } = {
     object: ObjectPanel,
-    layer: LayerPanel
+    layer: LayerPanel,
+    artboard: ArtboardPanel
   };
 
   return (

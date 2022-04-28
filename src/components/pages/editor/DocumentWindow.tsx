@@ -3,15 +3,15 @@ import { fabric } from 'fabric';
 import { generateRandomId } from '~/src/lib/utils';
 import type { Shape } from '~/src/types/editor';
 import useBus from '~/src/hooks/useBus';
-import { EDITOR_CANVAS_EVENTS, TextPayload } from '~/src/types/editor';
+import { EDITOR_CANVAS_EVENTS, TextPayload, CanvasPayload } from '~/src/types/editor';
 import useStore from '~/src/store/editorStore';
 import useEsc from '~/src/hooks/useEsc';
 
 const DocumentWindow: FC = () => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvas = useRef<fabric.Canvas | null>(null);
 
+  const setCanvas = useStore((state) => state.setCanvas);
   const activeTool = useStore((state) => state.activeTool);
   const setActiveTool = useStore((state) => state.setActiveTool);
   const color = useStore((state) => state.color);
@@ -38,15 +38,21 @@ const DocumentWindow: FC = () => {
    * @param canvas Canvas
    * @returns void
    */
-  const handleCanvasInit = useCallback((canvasInstance: fabric.Canvas) => {
-    if (!wrapperRef.current) return;
+  const handleCanvasInit = useCallback(
+    (canvasInstance: fabric.Canvas) => {
+      canvasInstance.setWidth(900);
+      canvasInstance.setHeight(600);
+      canvasInstance.setBackgroundColor(
+        'rgba(255,255,255)',
+        canvasInstance.renderAll.bind(canvasInstance)
+      );
 
-    canvasInstance.setWidth(wrapperRef.current.clientWidth);
-    canvasInstance.setHeight(wrapperRef.current.clientHeight);
-    canvasInstance.setBackgroundColor('#fff', canvasInstance.renderAll.bind(canvasInstance));
+      canvasInstance.renderAll();
 
-    canvasInstance.renderAll();
-  }, []);
+      setCanvas(canvasInstance);
+    },
+    [setCanvas]
+  );
 
   /**
    * Handle Object Selection
@@ -446,9 +452,34 @@ const DocumentWindow: FC = () => {
 
   useBus<{ name: string }>(EDITOR_CANVAS_EVENTS.HIDE_OBJECT, ({ name }) => handleHideObject(name));
 
+  /**
+   * Handle Canvas Update
+   * @param payload {CanvasPayload}
+   * @returns {void}
+   */
+  const handleCanvasUpdate = (payload: CanvasPayload): void => {
+    if (!canvas.current) return;
+
+    const { backgroundColor, size } = payload;
+
+    canvas.current.setBackgroundColor(
+      backgroundColor,
+      canvas.current.renderAll.bind(canvas.current)
+    );
+
+    canvas.current.setWidth(size.width);
+    canvas.current.setHeight(size.height);
+
+    canvas.current.renderAll();
+  };
+
+  useBus<{ payload: CanvasPayload }>(EDITOR_CANVAS_EVENTS.UPDATE_CANVAS, ({ payload }) =>
+    handleCanvasUpdate(payload)
+  );
+
   return (
-    <main className="flex w-full items-center justify-center bg-gray-200 md:w-8/12 2xl:w-9/12">
-      <div ref={wrapperRef} className="h-96 w-6/12 shadow-2xl">
+    <main className="flex w-full items-center justify-center overflow-scroll bg-gray-200 md:w-8/12 2xl:w-9/12">
+      <div className="shadow-2xl">
         <canvas ref={canvasRef} />
       </div>
     </main>

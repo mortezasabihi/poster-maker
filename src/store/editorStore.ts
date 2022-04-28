@@ -1,14 +1,16 @@
 import create from 'zustand';
-import { generateRandomHexColor } from '~/src/lib/utils';
+import { generateRandomRGBColor } from '~/src/lib/utils';
 import type { Tool } from '~/src/types/editor';
 
 interface EditorStore {
+  canvas: fabric.Canvas | null;
   activeTool: Tool | null;
   color: string;
   activeObject: any | null;
   activeObjectType: string | null;
   layers: fabric.Object[];
 
+  setCanvas(canvas: fabric.Canvas): void;
   setActiveTool: (tool: Tool | null) => void;
   setColor: (color: string) => void;
   setActiveObject: (object: fabric.Object | null) => void;
@@ -18,12 +20,14 @@ interface EditorStore {
 }
 
 const useStore = create<EditorStore>((set) => ({
+  canvas: null,
   activeTool: null,
-  color: generateRandomHexColor(),
+  color: generateRandomRGBColor(),
   activeObject: null,
   activeObjectType: null,
   layers: [],
 
+  setCanvas: (canvas) => set((state) => ({ ...state, canvas })),
   setActiveTool: (tool) => set((state) => ({ ...state, activeTool: tool })),
   setColor: (color) => set((state) => ({ ...state, color })),
   setActiveObject: (object) =>

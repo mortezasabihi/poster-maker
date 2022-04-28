@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { HexColorPicker } from 'react-colorful';
+import { RgbaStringColorPicker } from 'react-colorful';
 
 interface IProps {
   value: string | undefined;
@@ -7,7 +7,7 @@ interface IProps {
 }
 
 const ColorPicker: FC<IProps> = ({ value, onChange }) => {
-  return <HexColorPicker color={value} onChange={onChange} />;
+  return <RgbaStringColorPicker color={value} onChange={onChange} />;
 };
 
 export default ColorPicker;
