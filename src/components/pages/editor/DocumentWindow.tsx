@@ -1,13 +1,16 @@
 import { FC, useRef, useEffect, useCallback } from 'react';
 import { fabric } from 'fabric';
+import Draggable from 'react-draggable';
 import { generateRandomId } from '~/src/lib/utils';
 import type { Shape } from '~/src/types/editor';
 import useBus from '~/src/hooks/useBus';
 import { EDITOR_CANVAS_EVENTS, TextPayload, CanvasPayload } from '~/src/types/editor';
 import useStore from '~/src/store/editorStore';
 import useEsc from '~/src/hooks/useEsc';
+import useKeyPress from '~/src/hooks/useKeyPress';
 
 const DocumentWindow: FC = () => {
+  const mainRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvas = useRef<fabric.Canvas | null>(null);
 
@@ -36,7 +39,7 @@ const DocumentWindow: FC = () => {
   /**
    * Handle Canvas Init
    * @param canvas Canvas
-   * @returns void
+   * @returns {void}
    */
   const handleCanvasInit = useCallback(
     (canvasInstance: fabric.Canvas) => {
@@ -57,7 +60,7 @@ const DocumentWindow: FC = () => {
   /**
    * Handle Object Selection
    * @params e {any}
-   * @returns void
+   * @returns {void}
    */
   const handleObjectSelection = useCallback(
     (e: any) => {
@@ -70,7 +73,7 @@ const DocumentWindow: FC = () => {
 
   /**
    * Handle Object Added
-   * @returns void
+   * @returns {void}
    */
   const handleObjectAdded = useCallback(() => {
     if (!canvas.current) return;
@@ -477,11 +480,41 @@ const DocumentWindow: FC = () => {
     handleCanvasUpdate(payload)
   );
 
+  const space = useKeyPress(' ');
+
+  /**
+   * Handle Space Key Press
+   * @returns {void}
+   */
+  const handleSpaceKeyPress = useCallback(() => {
+    if (!canvas.current) return;
+
+    if (space) {
+      canvas.current.discardActiveObject();
+      canvas.current.selection = false;
+    } else {
+      canvas.current.selection = true;
+    }
+
+    canvas.current.renderAll();
+  }, [space]);
+
+  useEffect(() => {
+    handleSpaceKeyPress();
+  }, [handleSpaceKeyPress]);
+
   return (
-    <main className="flex w-full items-center justify-center overflow-scroll bg-gray-200 md:w-8/12 2xl:w-9/12">
-      <div className="shadow-2xl">
-        <canvas ref={canvasRef} />
-      </div>
+    <main
+      ref={mainRef}
+      className="relative flex w-full items-center justify-center overflow-scroll bg-gray-200 md:w-8/12 2xl:w-9/12"
+    >
+      <Draggable disabled={!space} bounds="parent">
+        <div className={`absolute shadow-2xl ${space ? 'cursor-pointer' : ''}`}>
+          {/* overlay */}
+          <div className={`absolute inset-0 z-50 ${space ? 'block' : 'hidden'}`} />
+          <canvas ref={canvasRef} />
+        </div>
+      </Draggable>
     </main>
   );
 };
