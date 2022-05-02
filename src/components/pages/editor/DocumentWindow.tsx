@@ -4,7 +4,12 @@ import Draggable from 'react-draggable';
 import { generateRandomId } from '~/src/lib/utils';
 import type { Shape } from '~/src/types/editor';
 import useBus from '~/src/hooks/useBus';
-import { EDITOR_CANVAS_EVENTS, TextPayload, CanvasPayload } from '~/src/types/editor';
+import {
+  EDITOR_CANVAS_EVENTS,
+  TextPayload,
+  CanvasPayload,
+  ObjectOrderPayload
+} from '~/src/types/editor';
 import useStore from '~/src/store/editorStore';
 import useEsc from '~/src/hooks/useEsc';
 import useKeyPress from '~/src/hooks/useKeyPress';
@@ -478,6 +483,44 @@ const DocumentWindow: FC = () => {
 
   useBus<{ payload: CanvasPayload }>(EDITOR_CANVAS_EVENTS.UPDATE_CANVAS, ({ payload }) =>
     handleCanvasUpdate(payload)
+  );
+
+  /**
+   * Handle Object Order
+   * @param payload {ObjectOrderPayload}
+   * @returns {void}
+   */
+  const handleObjectOrder = ({
+    dragName,
+    hoverName,
+    dragIndex,
+    hoverIndex
+  }: ObjectOrderPayload): void => {
+    if (!canvas.current) return;
+
+    const direction = dragIndex < hoverIndex ? 1 : -1;
+    const dragObject = canvas.current.getObjects().find((object) => object.name === dragName);
+    const hoverObject = canvas.current.getObjects().find((object) => object.name === hoverName);
+
+    if (dragObject && hoverObject) {
+      if (hoverIndex === 0) {
+        canvas.current.sendToBack(dragObject);
+      } else if (hoverIndex === canvas.current.getObjects().length - 1) {
+        canvas.current.bringToFront(dragObject);
+      }
+
+      if (hoverIndex !== canvas.current.getObjects().length - 1 && hoverIndex !== 0) {
+        if (direction === 1) {
+          canvas.current.bringForward(dragObject);
+        } else {
+          canvas.current.sendBackwards(dragObject);
+        }
+      }
+    }
+  };
+
+  useBus<{ payload: ObjectOrderPayload }>(EDITOR_CANVAS_EVENTS.UPDATE_OBJECT_ORDER, ({ payload }) =>
+    handleObjectOrder(payload)
   );
 
   const space = useKeyPress(' ');

@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { FC } from 'react';
 
 type IconTypes = 'rect' | 'triangle' | 'polygon' | 'circle' | 'i-text' | 'line' | 'path';
 
@@ -8,6 +8,8 @@ interface IProps {
   selected: fabric.Object;
   onHide: (layer: fabric.Object) => void;
   onLock: (layer: fabric.Object) => void;
+  onDragStart: (e: React.DragEvent<HTMLElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLElement>) => void;
 }
 
 const TypeIcon: FC<{
@@ -79,7 +81,7 @@ const TypeIcon: FC<{
   );
 };
 
-const Layer: FC<IProps> = ({ layer, onSelect, selected, onHide, onLock }) => {
+const Layer: FC<IProps> = ({ layer, onSelect, selected, onHide, onLock, onDragStart, onDrop }) => {
   const isHide = layer.visible === false;
   const isLock =
     (layer.lockMovementX &&
@@ -92,10 +94,13 @@ const Layer: FC<IProps> = ({ layer, onSelect, selected, onHide, onLock }) => {
 
   return (
     <li
+      onDragStart={onDragStart}
+      onDrop={onDrop}
+      draggable
       onClick={() => onSelect(layer)}
-      className={`group flex cursor-pointer select-none items-center justify-between rounded py-1.5 px-2 ${
-        selectedLayer && 'bg-blue-100'
-      }`}
+      className={`px-2, group flex cursor-pointer select-none items-center justify-between rounded py-1.5 px-2
+       ${selectedLayer ? 'bg-blue-100' : 'bg-white'}
+      `}
     >
       <span className="flex items-center">
         <TypeIcon type={layer.type as IconTypes} />

@@ -17,6 +17,7 @@ interface EditorStore {
   addLayer: (layer: fabric.Object) => void;
   removeLayer: (name: string) => void;
   updateLayer: (name: string, layer: fabric.Object) => void;
+  updateLayers: (dragName: string, hoverName: string) => void;
 }
 
 const useStore = create<EditorStore>((set) => ({
@@ -39,7 +40,17 @@ const useStore = create<EditorStore>((set) => ({
     set((state) => ({
       ...state,
       layers: state.layers.map((l) => (l.name === name ? layer : l))
-    }))
+    })),
+  updateLayers: (dragName, hoverName) =>
+    set((state) => {
+      const layers = [...state.layers];
+      const dragLayerIndex = layers.findIndex((layer) => layer.name === dragName);
+      const hoverLayerIndex = layers.findIndex((layer) => layer.name === hoverName);
+
+      layers.splice(hoverLayerIndex, 0, layers.splice(dragLayerIndex, 1)[0]);
+
+      return { ...state, layers };
+    })
 }));
 
 export default useStore;

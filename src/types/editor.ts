@@ -16,7 +16,8 @@ export enum EDITOR_CANVAS_EVENTS {
   SELECT_OBJECT = 'SELECT_OBJECT',
   LOCK_OBJECT = 'LOCK_OBJECT',
   HIDE_OBJECT = 'HIDE_OBJECT',
-  UPDATE_CANVAS = 'UPDATE_CANVAS'
+  UPDATE_CANVAS = 'UPDATE_CANVAS',
+  UPDATE_OBJECT_ORDER = 'UPDATE_OBJECT_ORDER'
 }
 
 export interface TextPayload {
@@ -33,4 +34,11 @@ export interface CanvasPayload {
     height: number;
   };
   orientation: 'landscape' | 'portrait';
+}
+
+export interface ObjectOrderPayload {
+  dragName: string;
+  hoverName: string;
+  dragIndex: number;
+  hoverIndex: number;
 }
