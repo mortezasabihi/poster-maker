@@ -11,7 +11,7 @@ import {
   ObjectOrderPayload
 } from '~/src/types/editor';
 import useStore from '~/src/store/editorStore';
-import useEsc from '~/src/hooks/useEsc';
+import useKeyDown from '~/src/hooks/useKeyDown';
 import useKeyPress from '~/src/hooks/useKeyPress';
 
 const DocumentWindow: FC = () => {
@@ -26,6 +26,7 @@ const DocumentWindow: FC = () => {
   const setActiveObject = useStore((state) => state.setActiveObject);
   const addLayer = useStore((state) => state.addLayer);
   const updateLayer = useStore((state) => state.updateLayer);
+  const removeLayer = useStore((state) => state.removeLayer);
 
   /**
    * Handle ESC key
@@ -39,7 +40,33 @@ const DocumentWindow: FC = () => {
     }
   }, [setActiveTool]);
 
-  useEsc(() => handleEscKey());
+  useKeyDown('Escape', () => handleEscKey());
+
+  /**
+   * Handle Delete key
+   * @returns {void}
+   */
+  const handleDeleteKey = useCallback(() => {
+    if (!canvas.current) return;
+
+    const activeObject = canvas.current.getActiveObject();
+
+    const isLocked =
+      activeObject.get('lockMovementX') &&
+      activeObject.get('lockMovementY') &&
+      activeObject.get('lockScalingX') &&
+      activeObject.get('lockScalingY') &&
+      activeObject.get('lockRotation');
+
+    if (isLocked) return;
+
+    removeLayer(activeObject?.name as string);
+
+    canvas.current.remove(activeObject);
+    canvas.current.renderAll();
+  }, [removeLayer]);
+
+  useKeyDown('Delete', () => handleDeleteKey());
 
   /**
    * Handle Canvas Init

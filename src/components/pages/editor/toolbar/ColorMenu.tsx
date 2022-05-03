@@ -1,7 +1,7 @@
 import { FC, useState, useRef } from 'react';
 import useStore from '~/src/store/editorStore';
 import useClickOutside from '~/src/hooks/useClickOutside';
-import useEsc from '~/src/hooks/useEsc';
+import useKeyDown from '~/src/hooks/useKeyDown';
 import { ColorPicker } from '~/src/components/global';
 
 const ColorMenu: FC = () => {
@@ -12,7 +12,7 @@ const ColorMenu: FC = () => {
   const setColor = useStore((dispatch) => dispatch.setColor);
 
   useClickOutside(ref, () => setOpen(false));
-  useEsc(() => setOpen(false));
+  useKeyDown('Escape', () => setOpen(false));
 
   return (
     <div ref={ref} className="relative">

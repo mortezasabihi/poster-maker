@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 
 /**
- * useEsc
+ * useKeyDown hook
  * @param callback {Function}
  * @returns {void}
  */
-const useEsc = (callback: () => void): void => {
+const useEsc = (key: KeyboardEvent['key'], callback: () => void): void => {
   useEffect(() => {
     const escHandler = (event: KeyboardEvent) => {
-      if (event.keyCode === 27) {
+      if (event.key === key) {
         callback();
       }
     };
@@ -18,7 +18,7 @@ const useEsc = (callback: () => void): void => {
     return () => {
       document.removeEventListener('keydown', escHandler);
     };
-  }, [callback]);
+  }, [callback, key]);
 };
 
 export default useEsc;
