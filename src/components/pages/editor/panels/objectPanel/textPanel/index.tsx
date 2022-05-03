@@ -1,12 +1,17 @@
-import type { FC } from 'react';
-import { useFormik } from 'formik';
+import { FC, useReducer, useEffect } from 'react';
 import useStore from '~/src/store/editorStore';
-import { dispatch } from '~/src/hooks/useBus';
+import { dispatch as busDispatch } from '~/src/hooks/useBus';
 import { EDITOR_CANVAS_EVENTS, TextPayload, TextAlign, FontStyle } from '~/src/types/editor';
 import FontFamilySelector from './FontFamilySelector';
 import FontSizeInput from './FontSizeInput';
 import TextAlignSelector from './TextAlignSelector';
 import FontStyleSelector from './FontStyleSelector';
+
+type Actions =
+  | { type: 'setFontFamily'; payload: TextPayload['fontFamily'] }
+  | { type: 'setFontSize'; payload: TextPayload['fontSize'] }
+  | { type: 'setTextAlign'; payload: TextPayload['textAlign'] }
+  | { type: 'setFontStyle'; payload: TextPayload['fontStyle'] };
 
 const TextPanel: FC = () => {
   const activeObject = useStore<fabric.IText>((state) => state.activeObject);
@@ -28,63 +33,68 @@ const TextPanel: FC = () => {
     return [...styles];
   };
 
-  const formik = useFormik<TextPayload>({
-    initialValues: {
-      fontFamily: activeObject.fontFamily as string,
-      fontSize: activeObject.fontSize as number,
-      textAlign: activeObject.textAlign as TextAlign,
-      fontStyle: fontStyle()
-    },
-    onSubmit: (values) => {
-      dispatch({
-        type: EDITOR_CANVAS_EVENTS.UPDATE_OBJECT,
-        payload: {
-          fontFamily: values.fontFamily,
-          fontSize: values.fontSize,
-          textAlign: values.textAlign,
-          fontStyle: values.fontStyle
-        }
-      });
+  const initialState: TextPayload = {
+    fontFamily: activeObject?.fontFamily as string,
+    fontSize: activeObject?.fontSize as number,
+    textAlign: activeObject?.textAlign as TextAlign,
+    fontStyle: fontStyle()
+  };
+
+  /**
+   * Reducer
+   * @param state {TextPayload}
+   * @param action {Actions}
+   * @returns {TextPayload}
+   */
+  const reducer = (state: TextPayload, action: Actions): TextPayload => {
+    switch (action.type) {
+      case 'setFontFamily':
+        return { ...state, fontFamily: action.payload };
+      case 'setFontSize':
+        return { ...state, fontSize: action.payload };
+      case 'setTextAlign':
+        return { ...state, textAlign: action.payload };
+      case 'setFontStyle':
+        return { ...state, fontStyle: action.payload };
+      default:
+        return state;
     }
-  });
+  };
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    busDispatch({
+      type: EDITOR_CANVAS_EVENTS.UPDATE_OBJECT,
+      payload: state
+    });
+  }, [state]);
 
   return (
     <form>
       <FontFamilySelector
-        value={formik.values.fontFamily}
-        onChange={(v) => {
-          formik.setFieldValue('fontFamily', v);
-          formik.submitForm();
-        }}
+        value={state.fontFamily}
+        onChange={(v) => dispatch({ type: 'setFontFamily', payload: v })}
       />
 
       <div className="grid grid-cols-12 gap-x-8">
         <div className="md:col-span-4 2xl:col-span-5">
           <FontSizeInput
-            value={formik.values.fontSize}
-            onChange={(v) => {
-              formik.setFieldValue('fontSize', v);
-              formik.submitForm();
-            }}
+            value={state.fontSize}
+            onChange={(v) => dispatch({ type: 'setFontSize', payload: v })}
           />
         </div>
         <div className="md:col-span-8 2xl:col-span-7">
           <TextAlignSelector
-            value={formik.values.textAlign}
-            onChange={(v) => {
-              formik.setFieldValue('textAlign', v);
-              formik.submitForm();
-            }}
+            value={state.textAlign}
+            onChange={(v) => dispatch({ type: 'setTextAlign', payload: v })}
           />
         </div>
       </div>
 
       <FontStyleSelector
-        value={formik.values.fontStyle}
-        onChange={(v) => {
-          formik.setFieldValue('fontStyle', v);
-          formik.submitForm();
-        }}
+        value={state.fontStyle}
+        onChange={(v) => dispatch({ type: 'setFontStyle', payload: v })}
       />
     </form>
   );
