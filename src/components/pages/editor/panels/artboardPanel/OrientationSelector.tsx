@@ -17,13 +17,24 @@ const OrientationSelector: FC<IProps> = ({ value, onChange }) => {
     return value === orientation ? 'bg-gray-100' : '';
   };
 
+  /**
+   * Handle Click
+   * @param orientation {Orientation}
+   * @returns {void}
+   */
+  const handleClick = (orientation: Orientation): void => {
+    if (value === orientation) return;
+
+    onChange(orientation);
+  };
+
   return (
     <div className="flex h-full flex-col py-3">
       <label>Orientation</label>
 
       <div className="flex flex-1 items-center" role="group">
         <button
-          onClick={() => onChange('portrait')}
+          onClick={() => handleClick('portrait')}
           title="Portrait"
           type="button"
           className={`-mr-[1px] h-9 w-9 rounded-l-md border border-gray-300 text-gray-700 focus:z-10 ${activeClass(
@@ -45,7 +56,7 @@ const OrientationSelector: FC<IProps> = ({ value, onChange }) => {
           </svg>
         </button>
         <button
-          onClick={() => onChange('landscape')}
+          onClick={() => handleClick('landscape')}
           title="Landscape"
           type="button"
           className={`h-9 w-9 rounded-r-md border border-gray-300 text-gray-700 focus:z-10 ${activeClass(
