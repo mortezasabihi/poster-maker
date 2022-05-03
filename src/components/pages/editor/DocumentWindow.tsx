@@ -532,6 +532,10 @@ const DocumentWindow: FC = () => {
   const handleSpaceKeyPress = useCallback(() => {
     if (!canvas.current) return;
 
+    const activeObjectType = canvas.current.getActiveObject()?.type;
+
+    if (activeObjectType === 'i-text') return;
+
     if (space) {
       canvas.current.discardActiveObject();
       canvas.current.selection = false;
