@@ -2,14 +2,16 @@ import { FC, useRef, useEffect, useCallback } from 'react';
 import { fabric } from 'fabric';
 import Draggable from 'react-draggable';
 import { generateRandomId } from '~/src/lib/utils';
-import type { Shape } from '~/src/types/editor';
-import useBus from '~/src/hooks/useBus';
 import {
+  Shape,
+  ShapePayload,
   EDITOR_CANVAS_EVENTS,
   TextPayload,
+  ObjectPayload,
   CanvasPayload,
   ObjectOrderPayload
 } from '~/src/types/editor';
+import useBus, { dispatch } from '~/src/hooks/useBus';
 import useStore from '~/src/store/editorStore';
 import useKeyDown from '~/src/hooks/useKeyDown';
 import useKeyPress from '~/src/hooks/useKeyPress';
@@ -119,11 +121,39 @@ const DocumentWindow: FC = () => {
     addLayer(lastObject as unknown as fabric.Object);
   }, [addLayer]);
 
+  /**
+   * Handle Object Modified
+   * @param e {fabric.IEvent}
+   * @returns {void}
+   */
+  const handleObjectModified = useCallback(({ target }: fabric.IEvent) => {
+    dispatch({
+      type: EDITOR_CANVAS_EVENTS.MODIFY_OBJECT,
+      payload: target
+    });
+  }, []);
+
+  /**
+   * Handle Object Scaling
+   * @param e {fabric.IEvent}
+   * @returns {void}
+   */
+  const handleObjectScaling = useCallback(({ target }: fabric.IEvent) => {
+    const obj = target as fabric.Object;
+
+    obj.set({
+      scaleX: Number(obj.scaleX?.toFixed(4)),
+      scaleY: Number(obj.scaleY?.toFixed(4))
+    });
+  }, []);
+
   useEffect(() => {
     if (canvasRef.current) {
       const fCanvas = new fabric.Canvas(canvasRef.current);
 
       fCanvas.on('object:added', handleObjectAdded);
+      fCanvas.on('object:modified', handleObjectModified);
+      fCanvas.on('object:scaling', handleObjectScaling);
 
       // on object selected
       fCanvas.on('selection:created', handleObjectSelection);
@@ -142,7 +172,14 @@ const DocumentWindow: FC = () => {
     return () => {
       canvas.current?.dispose();
     };
-  }, [handleCanvasInit, handleObjectAdded, handleObjectSelection, setActiveObject]);
+  }, [
+    handleCanvasInit,
+    handleObjectAdded,
+    handleObjectModified,
+    handleObjectScaling,
+    handleObjectSelection,
+    setActiveObject
+  ]);
 
   const mouseDown = useRef<boolean>(false);
   const line = useRef<fabric.Line | null>(null);
@@ -273,7 +310,9 @@ const DocumentWindow: FC = () => {
             fill: color,
             top: 100,
             left: 100,
-            name: `rect-${generateRandomId()}`
+            name: `rect-${generateRandomId()}`,
+            originX: 'center',
+            originY: 'center'
           })
         );
       } else if (shape === 'circle') {
@@ -283,7 +322,9 @@ const DocumentWindow: FC = () => {
             fill: color,
             top: 100,
             left: 100,
-            name: `circle-${generateRandomId()}`
+            name: `circle-${generateRandomId()}`,
+            originX: 'center',
+            originY: 'center'
           })
         );
       } else if (shape === 'triangle') {
@@ -294,7 +335,9 @@ const DocumentWindow: FC = () => {
             fill: color,
             top: 100,
             left: 100,
-            name: `triangle-${generateRandomId()}`
+            name: `triangle-${generateRandomId()}`,
+            originX: 'center',
+            originY: 'center'
           })
         );
       } else if (shape === 'hexagon') {
@@ -313,7 +356,9 @@ const DocumentWindow: FC = () => {
             left: 100,
             width: 100,
             height: 100,
-            name: `hexagon-${generateRandomId()}`
+            name: `hexagon-${generateRandomId()}`,
+            originX: 'center',
+            originY: 'center'
           }
         );
         canvas.current.add(s);
@@ -337,7 +382,9 @@ const DocumentWindow: FC = () => {
               fill: color,
               top: 100,
               left: 100,
-              name: `octagon-${generateRandomId()}`
+              name: `octagon-${generateRandomId()}`,
+              originX: 'center',
+              originY: 'center'
             }
           )
         );
@@ -371,17 +418,17 @@ const DocumentWindow: FC = () => {
 
   /**
    * Handle Update Object
-   * @param payload {TextPayload}
+   * @param payload {ObjectPayload}
    * @returns {void}
    */
-  const handleUpdateObject = (payload: TextPayload): void => {
+  const handleUpdateObject = (payload: ObjectPayload): void => {
     if (!canvas.current) return;
 
     const type = canvas.current.getActiveObject()?.type;
 
     if (type === 'i-text') {
       const activeObject = canvas.current.getActiveObject() as fabric.IText;
-      const { fontFamily, fontSize, fontStyle, textAlign } = payload;
+      const { fontFamily, fontSize, fontStyle, textAlign } = payload as TextPayload;
 
       if (activeObject) {
         activeObject.set({
@@ -395,12 +442,25 @@ const DocumentWindow: FC = () => {
           ...(fontStyle.includes('overline') ? { overline: true } : { overline: false })
         });
       }
+    } else if (type === 'rect' || type === 'circle' || type === 'triangle' || type === 'polygon') {
+      const activeObject = canvas.current.getActiveObject();
+      const { size, rotation, stroke } = payload as ShapePayload;
 
-      canvas.current.renderAll();
+      if (activeObject) {
+        activeObject.set({
+          angle: rotation,
+          strokeWidth: stroke.width,
+          stroke: stroke.color,
+          width: (size.width as number) / (activeObject.scaleX as number),
+          height: (size.height as number) / (activeObject.scaleY as number)
+        });
+      }
     }
+
+    canvas.current.renderAll();
   };
 
-  useBus<{ payload: TextPayload }>(EDITOR_CANVAS_EVENTS.UPDATE_OBJECT, ({ payload }) =>
+  useBus<{ payload: ObjectPayload }>(EDITOR_CANVAS_EVENTS.UPDATE_OBJECT, ({ payload }) =>
     handleUpdateObject(payload)
   );
 

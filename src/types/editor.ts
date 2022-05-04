@@ -13,6 +13,7 @@ export enum EDITOR_CANVAS_EVENTS {
   ADD_SHAPE = 'ADD_SHAPE',
   ADD_TEXT = 'ADD_TEXT',
   UPDATE_OBJECT = 'UPDATE_OBJECT',
+  MODIFY_OBJECT = 'MODIFY_OBJECT',
   SELECT_OBJECT = 'SELECT_OBJECT',
   LOCK_OBJECT = 'LOCK_OBJECT',
   HIDE_OBJECT = 'HIDE_OBJECT',
@@ -26,6 +27,20 @@ export interface TextPayload {
   textAlign: TextAlign;
   fontStyle: FontStyle[];
 }
+
+export interface ShapePayload {
+  size: {
+    width: number;
+    height: number;
+  };
+  rotation: number;
+  stroke: {
+    color: string;
+    width: number;
+  };
+}
+
+export type ObjectPayload = TextPayload | ShapePayload;
 
 export interface CanvasPayload {
   backgroundColor: string;

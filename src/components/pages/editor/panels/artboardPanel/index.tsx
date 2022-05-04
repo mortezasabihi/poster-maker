@@ -5,7 +5,7 @@ import { getOrientation } from '~/src/lib/utils';
 import { dispatch as busDispatch } from '~/src/hooks/useBus';
 import BackgroundColorSelector from './BackgroundColorSelector';
 import OrientationSelector from './OrientationSelector';
-import SizeSelector from './SizeSelector';
+import { SizeSelector } from '~/src/components/global';
 
 type Actions =
   | { type: 'setBackgroundColor'; payload: CanvasPayload['backgroundColor'] }
