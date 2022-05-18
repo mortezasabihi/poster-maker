@@ -1,18 +1,18 @@
 import { FC, useReducer, useEffect } from 'react';
-import { ShapePayload, EDITOR_CANVAS_EVENTS } from '~/src/types/editor';
 import useStore from '~/src/store/editorStore';
+import { LinePayload, EDITOR_CANVAS_EVENTS } from '~/src/types/editor';
 import useBus, { dispatch as busDispatch } from '~/src/hooks/useBus';
 import { SizeSelector, StrokeSelector, RotationSelector } from '~/src/components/global';
 
 type Actions =
-  | { type: 'setSize'; payload: ShapePayload['size'] }
-  | { type: 'setRotation'; payload: ShapePayload['rotation'] }
-  | { type: 'setStroke'; payload: ShapePayload['stroke'] };
+  | { type: 'setStroke'; payload: LinePayload['stroke'] }
+  | { type: 'setSize'; payload: LinePayload['size'] }
+  | { type: 'setRotation'; payload: LinePayload['rotation'] };
 
-const ShapePanel: FC = () => {
+const LinePanel: FC = () => {
   const { activeObject } = useStore();
 
-  const intialState: ShapePayload = {
+  const initialState: LinePayload = {
     size: {
       width: (activeObject.width as number) * (activeObject.scaleX as number),
       height: (activeObject.height as number) * (activeObject.scaleY as number)
@@ -26,11 +26,11 @@ const ShapePanel: FC = () => {
 
   /**
    * Reducer
-   * @param state {ShapePayload}
+   * @param state {LinePayload}
    * @param action {Actions}
-   * @returns {ShapePayload}
+   * @returns {LinePayload}
    */
-  const reducer = (state: ShapePayload, action: Actions): ShapePayload => {
+  const reducer = (state: LinePayload, action: Actions): LinePayload => {
     switch (action.type) {
       case 'setSize':
         return { ...state, size: action.payload };
@@ -43,7 +43,7 @@ const ShapePanel: FC = () => {
     }
   };
 
-  const [state, dispatch] = useReducer(reducer, intialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     busDispatch({
@@ -51,6 +51,27 @@ const ShapePanel: FC = () => {
       payload: state
     });
   }, [state]);
+
+  /**
+   * Handle Line Drawed
+   * @param payload {fabric.Line}
+   * @returns {void}
+   */
+  const handleLineDrawed = (payload: fabric.Line): void => {
+    const { width, height, scaleX, scaleY } = payload;
+    if (!width || !height || !scaleX || !scaleY) return;
+    dispatch({
+      type: 'setSize',
+      payload: {
+        width: width * scaleX,
+        height: height * scaleY
+      }
+    });
+  };
+
+  useBus<{ payload: fabric.Line }>(EDITOR_CANVAS_EVENTS.HANDLE_LINE_DRAWED, ({ payload }) =>
+    handleLineDrawed(payload)
+  );
 
   /**
    * Handle Modify Object
@@ -87,7 +108,6 @@ const ShapePanel: FC = () => {
 
       <div>
         <StrokeSelector
-          checkable
           value={state.stroke}
           onChange={(v) => dispatch({ type: 'setStroke', payload: v })}
         />
@@ -96,4 +116,4 @@ const ShapePanel: FC = () => {
   );
 };
 
-export default ShapePanel;
+export default LinePanel;

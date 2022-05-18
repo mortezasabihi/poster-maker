@@ -9,7 +9,8 @@ import {
   TextPayload,
   ObjectPayload,
   CanvasPayload,
-  ObjectOrderPayload
+  ObjectOrderPayload,
+  LinePayload
 } from '~/src/types/editor';
 import useBus, { dispatch } from '~/src/hooks/useBus';
 import useStore from '~/src/store/editorStore';
@@ -219,6 +220,11 @@ const DocumentWindow: FC = () => {
 
       line.current.set({ x2: pointer.x, y2: pointer.y });
       canvas.current.renderAll();
+
+      dispatch({
+        type: EDITOR_CANVAS_EVENTS.HANDLE_LINE_DRAWED,
+        payload: line.current
+      });
     },
     [mouseDown]
   );
@@ -455,6 +461,19 @@ const DocumentWindow: FC = () => {
           height: (size.height as number) / (activeObject.scaleY as number)
         });
       }
+    } else if (type === 'line') {
+      const { stroke, size, rotation } = payload as LinePayload;
+      const activeObject = canvas.current.getActiveObject() as fabric.Line;
+
+      activeObject.set({
+        strokeWidth: stroke.width,
+        stroke: stroke.color,
+        width: size.width,
+        height: size.height,
+        scaleX: 1,
+        scaleY: 1,
+        angle: rotation
+      });
     }
 
     canvas.current.renderAll();

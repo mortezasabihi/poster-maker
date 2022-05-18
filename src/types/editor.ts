@@ -18,7 +18,8 @@ export enum EDITOR_CANVAS_EVENTS {
   LOCK_OBJECT = 'LOCK_OBJECT',
   HIDE_OBJECT = 'HIDE_OBJECT',
   UPDATE_CANVAS = 'UPDATE_CANVAS',
-  UPDATE_OBJECT_ORDER = 'UPDATE_OBJECT_ORDER'
+  UPDATE_OBJECT_ORDER = 'UPDATE_OBJECT_ORDER',
+  HANDLE_LINE_DRAWED = 'HANDLE_LINE_DRAWED'
 }
 
 export interface TextPayload {
@@ -40,7 +41,19 @@ export interface ShapePayload {
   };
 }
 
-export type ObjectPayload = TextPayload | ShapePayload;
+export interface LinePayload {
+  size: {
+    width: number;
+    height: number;
+  };
+  rotation: number;
+  stroke: {
+    color: string;
+    width: number;
+  };
+}
+
+export type ObjectPayload = TextPayload | ShapePayload | LinePayload;
 
 export interface CanvasPayload {
   backgroundColor: string;

@@ -10,9 +10,10 @@ interface Stroke {
 interface IProps {
   value: Stroke;
   onChange: (value: Stroke) => void;
+  checkable?: boolean;
 }
 
-const StrokeSelector: FC<IProps> = ({ value, onChange }) => {
+const StrokeSelector: FC<IProps> = ({ value, onChange, checkable }) => {
   const id = useId();
   const inputId = useId();
 
@@ -76,20 +77,23 @@ const StrokeSelector: FC<IProps> = ({ value, onChange }) => {
 
       <div className="flex items-center justify-between">
         <div className="relative flex items-center">
-          <input
-            type="checkbox"
-            name="bgColor"
-            id={id}
-            checked={checked}
-            onChange={handleCheckboxChange}
-          />
+          {checkable && (
+            <input
+              type="checkbox"
+              name="bgColor"
+              id={id}
+              checked={checked}
+              onChange={handleCheckboxChange}
+              className="mr-4"
+            />
+          )}
 
           <div ref={ref}>
             <button
               onClick={() => setOpen(true)}
               disabled={!checked}
               style={{ backgroundColor: color }}
-              className="my-2 ml-4 h-9 w-9 rounded border shadow-sm focus:border-inherit focus:ring-0"
+              className="my-2 h-9 w-9 rounded border shadow-sm focus:border-inherit focus:ring-0"
               title={color.toUpperCase()}
               type="button"
             />

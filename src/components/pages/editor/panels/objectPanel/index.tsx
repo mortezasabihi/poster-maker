@@ -3,6 +3,7 @@ import useStore from '~/src/store/editorStore';
 
 const TextPanel = lazy(() => import('./textPanel'));
 const ShapePanel = lazy(() => import('./shapePanel'));
+const LinePanel = lazy(() => import('./linePanel'));
 
 const ObjectPanel: FC = () => {
   const activeObjectType = useStore((state) => state.activeObjectType);
@@ -12,7 +13,8 @@ const ObjectPanel: FC = () => {
     rect: ShapePanel,
     circle: ShapePanel,
     triangle: ShapePanel,
-    polygon: ShapePanel
+    polygon: ShapePanel,
+    line: LinePanel
   };
 
   return (
