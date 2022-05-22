@@ -472,7 +472,9 @@ const DocumentWindow: FC = () => {
         height: size.height,
         scaleX: 1,
         scaleY: 1,
-        angle: rotation
+        angle: rotation,
+        originX: 'center',
+        originY: 'center'
       });
     }
 
