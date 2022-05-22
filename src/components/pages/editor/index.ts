@@ -1,3 +1,3 @@
-export { default as Toolbar } from './toolbar';
-export { default as Panels } from './panels';
-export { default as DocumentWindow } from './DocumentWindow';
+export { default as Desktop } from './desktop';
+export { default as Mobile } from './mobile';
+export { default as Loading } from './common/Loading';
