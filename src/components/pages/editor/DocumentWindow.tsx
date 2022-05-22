@@ -117,6 +117,13 @@ const DocumentWindow: FC = () => {
 
     // set last object active
     const lastObject = canvas.current.item(canvas.current.getObjects().length - 1);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (lastObject.type === 'path') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      lastObject.name = `pen-${generateRandomId()}`;
+    }
     canvas.current.setActiveObject(lastObject as unknown as fabric.Object);
 
     addLayer(lastObject as unknown as fabric.Object);
