@@ -31,22 +31,28 @@ const ToolsMenu: FC = () => {
     });
   };
 
+  /**
+   * Active Class
+   * @param tool {Tool}
+   * @returns {string}
+   */
+  const activeClass = (tool: Tool): string => {
+    return activeTool === tool ? 'text-blue-400' : 'text-gray-700';
+  };
+
   return (
     <ul className="w-full">
       <li>
         <button
           onClick={() => handleToolClick('pen')}
           title="Pen"
-          className={`flex w-full justify-center p-3 text-gray-700 focus:ring-0 ${
-            activeTool === 'pen' && 'bg-gray-200'
-          }`}
+          className={`flex w-full justify-center p-3 focus:ring-0 ${activeClass('pen')}`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="h-6 w-6 stroke-current"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="#2c3e50"
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -61,16 +67,13 @@ const ToolsMenu: FC = () => {
         <button
           onClick={() => handleToolClick('line')}
           title="Line"
-          className={`flex w-full justify-center p-3 text-gray-700 focus:ring-0 ${
-            activeTool === 'line' && 'bg-gray-200'
-          }`}
+          className={`flex w-full justify-center p-3 focus:ring-0 ${activeClass('line')}`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="h-6 w-6 stroke-current"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="#2c3e50"
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -90,10 +93,9 @@ const ToolsMenu: FC = () => {
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="h-6 w-6 stroke-current"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="#2c3e50"
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
