@@ -15,5 +15,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['./tailwind.config.js']
+  },
+  server: {
+    port: 1234,
+    open: true
   }
 });
