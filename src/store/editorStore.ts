@@ -1,6 +1,6 @@
 import create from 'zustand';
 import { generateRandomRGBColor } from '~/src/lib/utils';
-import type { Tool } from '~/src/types/editor';
+import type { FileWithPreview, Tool } from '~/src/types/editor';
 
 interface EditorStore {
   canvas: fabric.Canvas | null;
@@ -9,6 +9,7 @@ interface EditorStore {
   activeObject: any | null;
   activeObjectType: string | null;
   layers: fabric.Object[];
+  backgroundImage: FileWithPreview | null;
 
   setCanvas(canvas: fabric.Canvas): void;
   setActiveTool: (tool: Tool | null) => void;
@@ -18,6 +19,7 @@ interface EditorStore {
   removeLayer: (name: string) => void;
   updateLayer: (name: string, layer: fabric.Object) => void;
   updateLayers: (dragName: string, hoverName: string) => void;
+  setBackgroundImage: (image: FileWithPreview | null) => void;
 }
 
 const useStore = create<EditorStore>((set) => ({
@@ -27,6 +29,7 @@ const useStore = create<EditorStore>((set) => ({
   activeObject: null,
   activeObjectType: null,
   layers: [],
+  backgroundImage: null,
 
   setCanvas: (canvas) => set((state) => ({ ...state, canvas })),
   setActiveTool: (tool) => set((state) => ({ ...state, activeTool: tool })),
@@ -50,7 +53,8 @@ const useStore = create<EditorStore>((set) => ({
       layers.splice(hoverLayerIndex, 0, layers.splice(dragLayerIndex, 1)[0]);
 
       return { ...state, layers };
-    })
+    }),
+  setBackgroundImage: (image) => set((state) => ({ ...state, backgroundImage: image }))
 }));
 
 export default useStore;

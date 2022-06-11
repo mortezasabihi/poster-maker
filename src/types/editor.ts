@@ -8,6 +8,8 @@ export type FontStyle = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'ove
 
 export type ActivePanel = 'object' | 'layer' | 'artboard';
 
+export type FileWithPreview = File & { preview: string };
+
 export enum EDITOR_CANVAS_EVENTS {
   CHANGE_BG_COLOR = 'CHANGE_BG_COLOR',
   ADD_SHAPE = 'ADD_SHAPE',
@@ -62,6 +64,7 @@ export interface CanvasPayload {
     height: number;
   };
   orientation: 'landscape' | 'portrait';
+  backgroundImage: string;
 }
 
 export interface ObjectOrderPayload {

@@ -5,20 +5,20 @@ import { useEffect } from 'react';
  * @param callback {Function}
  * @returns {void}
  */
-const useEsc = (key: KeyboardEvent['key'], callback: () => void): void => {
+const useKeyDown = (key: KeyboardEvent['key'], callback: () => void): void => {
   useEffect(() => {
-    const escHandler = (event: KeyboardEvent) => {
+    const keyDownHandler = (event: KeyboardEvent) => {
       if (event.key === key) {
         callback();
       }
     };
 
-    document.addEventListener('keydown', escHandler);
+    document.addEventListener('keydown', keyDownHandler);
 
     return () => {
-      document.removeEventListener('keydown', escHandler);
+      document.removeEventListener('keydown', keyDownHandler);
     };
   }, [callback, key]);
 };
 
-export default useEsc;
+export default useKeyDown;

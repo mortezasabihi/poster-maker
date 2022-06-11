@@ -583,7 +583,7 @@ const DocumentWindow: FC = () => {
   const handleCanvasUpdate = (payload: CanvasPayload): void => {
     if (!canvas.current) return;
 
-    const { backgroundColor, size } = payload;
+    const { backgroundColor, size, backgroundImage } = payload;
 
     canvas.current.setBackgroundColor(
       backgroundColor,
@@ -593,7 +593,14 @@ const DocumentWindow: FC = () => {
     canvas.current.setWidth(size.width);
     canvas.current.setHeight(size.height);
 
-    canvas.current.renderAll();
+    if (backgroundImage) {
+      canvas.current.setBackgroundImage(
+        backgroundImage,
+        canvas.current.renderAll.bind(canvas.current)
+      );
+    } else {
+      canvas.current.setBackgroundImage(null, canvas.current.renderAll.bind(canvas.current));
+    }
   };
 
   useBus<{ payload: CanvasPayload }>(EDITOR_CANVAS_EVENTS.UPDATE_CANVAS, ({ payload }) =>
