@@ -26,7 +26,10 @@ module.exports = {
     'space-before-function-paren': ['error', { anonymous: 'ignore', named: 'always' }],
     'func-names': ['error', 'never'],
     'import/extensions': [0, 'never'],
-    'import/no-extraneous-dependencies': ['error', { devDependencies: ['./tailwind.config.js'] }],
+    'import/no-extraneous-dependencies': [
+      'error',
+      { devDependencies: ['./tailwind.config.js', './vite.config.ts'] }
+    ],
     'react/react-in-jsx-scope': 'off',
     'import/no-unresolved': 'off'
   },
